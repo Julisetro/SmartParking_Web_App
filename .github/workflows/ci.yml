@@ -5,10 +5,10 @@ name: CI Linter Checks
 on:
   # Se ejecuta en cada push a la rama 'develop'
   push:
-    branches: ["develop"]
+    branches: [ "develop" ]
   # También se ejecuta cuando se crea o actualiza un Pull Request dirigido a 'main' o 'develop'
   pull_request:
-    branches: ["main", "develop"]
+    branches: [ "main", "develop" ]
 
 # Define los trabajos (jobs) que se ejecutarán en paralelo
 jobs:
@@ -27,8 +27,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: '22'
+          cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
       # 3. Instala las dependencias del frontend de forma segura
@@ -51,7 +51,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: '3.13'
 
       - name: Install backend dependencies
         run: |
