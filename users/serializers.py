@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from .models import CustomUser
@@ -29,3 +30,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             celular=validated_data.get("celular", ""),
         )
         return user
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = (
+            "first_name",
+            "last_name",
+        )
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    new_password2 = serializers.CharField(required=True)
+
+    def validate(self, data):
+        # Aqui validamos la nueva contraseña
+        if data["new_password"] != data["new_password2"]:
+            raise serializers.ValidationError("Las nuevas contraseñas no coinciden.")
+        validate_password(data["new_password"])
+        return data
