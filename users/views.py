@@ -1,8 +1,14 @@
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.core.mail import EmailMultiAlternatives
+from django.urls import reverse
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
 from .models import CustomUser
 from .serializers import (
+    ChangeEmailRequestSerializer,
     ChangePasswordSerializer,
     UserRegistrationSerializer,
     UserUpdateSerializer,
@@ -76,4 +82,102 @@ class ChangePasswordView(generics.UpdateAPIView):
         user.save()
         return Response(
             {"detail": "Contraseña actualizada con éxito."}, status=status.HTTP_200_OK
+        )
+
+
+class ChangeEmailRequestView(generics.UpdateAPIView):
+    """
+    Vista de API para iniciar el proceso de cambio de email.
+    """
+
+    serializer_class = ChangeEmailRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+        Este método maneja la petición POST para iniciar el cambio de email.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        password = serializer.validated_data["password"]
+        new_email = serializer.validated_data["new_email"]
+
+        # 1. Verificamos que la contraseña sea correcta
+        if not user.check_password(password):
+            return Response(
+                {"password": ["La contraseña es incorrecta."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # 2. Guardamos el nuevo email en el usuario para usarlo en el link de confirmacion #noqa: E501
+        request.session["new_email_for_change"] = new_email
+        # 3. Generamos el token de confirmacion
+        token_generator = PasswordResetTokenGenerator()
+        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+        token = token_generator.make_token(user)
+        # 4. Construimos el link de confirmacion
+        verification_url = request.build_absolute_uri(
+            reverse("email-change-confirm", kwargs={"uidb64": uidb64, "token": token})
+        )
+        # 5. Enviamos el email de confirmacion (se imprime en consola)
+        subject = "Confirma tu cambio de correo electrónico"
+        text_content = f"Hola {user.first_name},\n\nPor favor, confirma tu cambio de correo electrónico haciendo clic en el siguiente enlace:\n{verification_url}\n\nSi no solicitaste este cambio, puedes ignorar este correo.\n\nGracias."  # noqa: E501
+        # Se usa EmailMultiAlternatives para enviar tanto texto plano como HTML
+        msg = EmailMultiAlternatives(
+            subject, text_content, "noreply@smartparking.com", [new_email]
+        )
+        msg.send()
+        return Response(
+            {"detail": "Se ha enviado un correo de confirmación a la nueva dirección."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class ChangeEmailConfirmView(generics.GenericAPIView):
+    """
+    Vista de API para confirmar el cambio de email.
+    """
+
+    # Cualquiera con el enlace puede acceder
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, uidb64, token, *args, **kwargs):
+        """
+        Este método maneja la petición GET para confirmar el cambio de email.
+        """
+        try:
+            # Decodificamos el uidb64 para obtener el ID del usuario
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            user = None
+
+        # Recuperamos el nuevo email de la sesión
+        new_email = request.session.get("new_email_for_change")
+
+        token_generator = PasswordResetTokenGenerator()
+        if (
+            user is not None
+            and token_generator.check_token(user, token)
+            and new_email is not None
+        ):  # noqa: E501
+            # Verificamos que el nuevo email no haya sido tomado mientras tanto
+            if CustomUser.objects.filter(email__iexact=new_email).exists():
+                return Response(
+                    {"detail": "Este correo electrónico ya está en uso."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            # Si el token es válido, actualizamos el email
+            user.email = new_email
+            user.username = new_email
+            user.save()
+            # Limpiamos el nuevo email de la sesión
+            del request.session["new_email_for_change"]
+            return Response(
+                {"detail": "Correo electrónico actualizado con éxito."},
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"detail": "El enlace de confirmación es inválido o ha expirado."},
+            status=status.HTTP_400_BAD_REQUEST,
         )

@@ -6,7 +6,13 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from .views import ChangePasswordView, UserProfileView, UserRegistrationView
+from .views import (
+    ChangeEmailConfirmView,
+    ChangeEmailRequestView,
+    ChangePasswordView,
+    UserProfileView,
+    UserRegistrationView,
+)
 
 # La variable "urlpatterns" es una lista que Django busca
 # para encontrar las rutas de la aplicación
@@ -22,4 +28,14 @@ urlpatterns = [
     path("me/", UserProfileView.as_view(), name="user-profile"),
     # Nueva URL para cambiar la contraseña
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    # Nueva URL para iniciar el proceso de cambio de email
+    path(
+        "change-email/", ChangeEmailRequestView.as_view(), name="email-change-request"
+    ),
+    # Nueva URL para confirmar el cambio de email
+    path(
+        "change-email/confirm/<str:uidb64>/<str:token>/",
+        ChangeEmailConfirmView.as_view(),
+        name="email-change-confirm",
+    ),
 ]

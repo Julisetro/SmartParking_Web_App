@@ -9,6 +9,8 @@ class CustomUser(AbstractUser):
     pero permite agregar campos adicionales si es necesario.
     """
 
+    # Hacemos que username del framework no sea unico y pueda ser nulo para que no haya
+    # conflicto con el email que actuara como username
     username = models.CharField(max_length=150, unique=False, null=True, blank=True)
     cedula = models.CharField(max_length=20, unique=True, null=True, blank=True)
     celular = models.CharField(max_length=20, null=True, blank=True)
@@ -16,7 +18,7 @@ class CustomUser(AbstractUser):
     # Hacemos que email sea el campo de login y que sea unico
     email = models.EmailField(unique=True)
 
-    # Le decihos a django que use el email para autenticar
+    # Le decimos a django que use el email para autenticar
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name"]
 

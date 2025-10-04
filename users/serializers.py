@@ -17,7 +17,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             "cedula",
             "celular",
         )
-        extra_kwargs = {"pasword": {"write_only": True}}
+        extra_kwargs = {"password": {"write_only": True}}
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
@@ -52,3 +52,19 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError("Las nuevas contraseñas no coinciden.")
         validate_password(data["new_password"])
         return data
+
+
+class ChangeEmailRequestSerializer(serializers.Serializer):
+    """
+    Serializer para cambiar el email del usuario.
+    Valida la contraseña actual y el nuevo email.
+    """
+
+    password = serializers.CharField(write_only=True, required=True)
+    new_email = serializers.EmailField(required=True)
+
+    def validate_new_email(self, value):
+        # Chequeamos que el nuevo email no este en uso
+        if CustomUser.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("Este email ya está en uso.")
+        return value

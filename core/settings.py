@@ -141,3 +141,6 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     )
 }
+
+# Congiguracion para pruebas de Email con console backend
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
