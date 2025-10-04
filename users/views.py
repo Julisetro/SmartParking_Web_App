@@ -1,3 +1,7 @@
+import random
+import string
+from datetime import datetime, timedelta, timezone
+
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import EmailMultiAlternatives
 from django.urls import reverse
@@ -8,6 +12,8 @@ from rest_framework.response import Response
 
 from .models import CustomUser
 from .serializers import (
+    ChangeCelularConfirmSerializer,
+    ChangeCelularRequestSerializer,
     ChangeEmailRequestSerializer,
     ChangePasswordSerializer,
     UserRegistrationSerializer,
@@ -180,4 +186,105 @@ class ChangeEmailConfirmView(generics.GenericAPIView):
         return Response(
             {"detail": "El enlace de confirmación es inválido o ha expirado."},
             status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class ChangeCelularRequestView(generics.UpdateAPIView):
+    """
+    Vista para iniciar el proceso de cambio de número de celular.
+    """
+
+    serializer_class = ChangeCelularRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        password = serializer.validated_data["password"]
+        new_celular = serializer.validated_data["new_celular"]
+        # 1. Verificamos que la contraseña sea correcta
+        if not user.check_password(password):
+            return Response(
+                {"password": ["La contraseña es incorrecta."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # 2. Generamos un código de verificación
+        verification_code = "".join(random.choices(string.digits, k=6))
+        # Simulamos el envío del código por SMS imprimiéndolo en consola
+        print("---Simulación de envío de SMS---")
+        print(f"Para: {new_celular}")
+        print(f"Código de verificación: {verification_code}")
+        print("-------------------------------")
+        # 3. Guardamos el código y el nuevo celular en la sesión con un timestamp
+        request.session["new_celular_for_change"] = new_celular
+        request.session["celular_verification_code"] = verification_code
+        request.session["celular_code_expires"] = (
+            datetime.now(timezone.utc) + timedelta(minutes=6)
+        ).isoformat()
+        return Response(
+            {
+                "detail": "Se ha enviado un código de verificación al nuevo número de celular."  # noqa: E501
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class ChangeCelularConfirmView(generics.GenericAPIView):
+    """
+    Vista para confirmar el cambio de número de celular
+    mediante un código de verificación.
+    """
+
+    serializer_class = ChangeCelularConfirmSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # Validamos el código de verificación
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_code = serializer.validated_data["verification_code"]
+        new_celular = request.session.get("new_celular_for_change")
+        verification_code = request.session.get("celular_verification_code")
+        expires_at_str = request.session.get("celular_code_expires")
+        # 1. Verificamos que haya un proceso en curso
+        if not all([new_celular, verification_code, expires_at_str]):
+            return Response(
+                {"detail": "No hay un proceso de cambio de celular en curso."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # 2. Verificamos que el código no haya expirado
+        expires_at = datetime.fromisoformat(expires_at_str)
+        if datetime.now(timezone.utc) > expires_at:
+            # Limpiamos la sesión
+            del request.session["new_celular_for_change"]
+            del request.session["celular_verification_code"]
+            del request.session["celular_code_expires"]
+            return Response(
+                {"detail": "El código de verificación ha expirado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # 3. Verificamos que el código sea correcto
+        if user_code != verification_code:
+            return Response(
+                {"verification_code": ["El código de verificación es incorrecto."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # 4. Verificamos que el nuevo celular no haya sido tomado mientras tanto
+        if CustomUser.objects.filter(celular=new_celular).exists():
+            return Response(
+                {"detail": "Este número de celular ya está en uso."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # 5. Si todo es correcto, actualizamos el número de celular
+        user = request.user
+        user.celular = new_celular
+        user.save(update_fields=["celular"])
+        # Limpiamos la sesión
+        del request.session["new_celular_for_change"]
+        del request.session["celular_verification_code"]
+        del request.session["celular_code_expires"]
+        return Response(
+            {"detail": "Número de celular actualizado con éxito."},
+            status=status.HTTP_200_OK,
         )

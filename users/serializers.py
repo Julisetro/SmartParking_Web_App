@@ -68,3 +68,28 @@ class ChangeEmailRequestSerializer(serializers.Serializer):
         if CustomUser.objects.filter(email__iexact=value).exists():
             raise serializers.ValidationError("Este email ya está en uso.")
         return value
+
+
+class ChangeCelularRequestSerializer(serializers.Serializer):
+    """
+    Serializador para solicitar el cambio de número de celular.
+    Valida la contraseña actual y el nuevo número de celular.
+    """
+
+    password = serializers.CharField(write_only=True, required=True)
+    new_celular = serializers.CharField(required=True)
+
+    def validate_new_celular(self, value):
+        # Comprueba que el nuevo número de celular no esté en uso
+        if CustomUser.objects.filter(celular=value).exists():
+            raise serializers.ValidationError("Este número de celular ya está en uso.")
+        return value
+
+
+class ChangeCelularConfirmSerializer(serializers.Serializer):
+    """
+    Serializador para confirmar el cambio de número de celular
+    mediante un código de verificación.
+    """
+
+    verification_code = serializers.CharField(required=True, min_length=6, max_length=6)

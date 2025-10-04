@@ -7,6 +7,8 @@ from rest_framework_simplejwt.views import (
 )
 
 from .views import (
+    ChangeCelularConfirmView,
+    ChangeCelularRequestView,
     ChangeEmailConfirmView,
     ChangeEmailRequestView,
     ChangePasswordView,
@@ -28,6 +30,17 @@ urlpatterns = [
     path("me/", UserProfileView.as_view(), name="user-profile"),
     # Nueva URL para cambiar la contraseña
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
+    # Nueva URL para iniciar el proceso de cambio de celular
+    path(
+        "change-celular/",
+        ChangeCelularRequestView.as_view(),
+        name="celular-change-request",
+    ),
+    path(
+        "change-celular/confirm/",
+        ChangeCelularConfirmView.as_view(),
+        name="celular-change-confirm",
+    ),
     # Nueva URL para iniciar el proceso de cambio de email
     path(
         "change-email/", ChangeEmailRequestView.as_view(), name="email-change-request"
