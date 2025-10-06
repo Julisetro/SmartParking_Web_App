@@ -93,3 +93,7 @@ class ChangeCelularConfirmSerializer(serializers.Serializer):
     """
 
     verification_code = serializers.CharField(required=True, min_length=6, max_length=6)
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()

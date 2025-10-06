@@ -9,6 +9,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
 from .serializers import (
@@ -16,6 +17,7 @@ from .serializers import (
     ChangeCelularRequestSerializer,
     ChangeEmailRequestSerializer,
     ChangePasswordSerializer,
+    LogoutSerializer,
     UserRegistrationSerializer,
     UserUpdateSerializer,
 )
@@ -288,3 +290,21 @@ class ChangeCelularConfirmView(generics.GenericAPIView):
             {"detail": "Número de celular actualizado con éxito."},
             status=status.HTTP_200_OK,
         )
+
+
+class LogoutView(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    # Metodo para cerrar sesion
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            refresh_token = serializer.validated_data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)

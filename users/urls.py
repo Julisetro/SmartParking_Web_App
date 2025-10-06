@@ -12,6 +12,7 @@ from .views import (
     ChangeEmailConfirmView,
     ChangeEmailRequestView,
     ChangePasswordView,
+    LogoutView,
     UserProfileView,
     UserRegistrationView,
 )
@@ -51,4 +52,6 @@ urlpatterns = [
         ChangeEmailConfirmView.as_view(),
         name="email-change-confirm",
     ),
+    # Nueva URL para cerrar sesión
+    path("logout/", LogoutView.as_view(), name="user_logout"),
 ]
