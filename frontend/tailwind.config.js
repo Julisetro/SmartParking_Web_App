@@ -13,6 +13,9 @@ export default {
       fontFamily: {
         sans: ['"Roboto"', 'sans-serif'],
       },
+      backgroundImage: {
+        'gradient-brand': 'linear-gradient(135deg, #008080, #e0f7fa)',
+      },
     },
   },
   plugins: [],

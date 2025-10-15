@@ -1,6 +1,6 @@
 import { Link, Outlet } from 'react-router-dom';
 
-export const RootLayout = () => {
+export const AppLayout = () => {
   return (
     <div className="flex flex-col min-h-screen font-sans bg-background text-text-main">
       <header className="bg-primary text-white shadow-md">

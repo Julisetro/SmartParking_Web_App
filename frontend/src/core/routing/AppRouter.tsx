@@ -3,7 +3,8 @@ import { HomePage } from '../../pages/HomePage';
 import { LoginPage } from '../../pages/LoginPage';
 import { RegisterPage } from '../../pages/RegisterPage';
 import { ProfilePage } from '../../pages/ProfilePage';
-import { RootLayout } from '../layout/RootLayout';
+import { AppLayout } from '../layout/AppLayout';
+import { PublicLayout } from '../layout/PublicLayout';
 
 /**
  * Definición de las rutas de la aplicación.
@@ -11,38 +12,16 @@ import { RootLayout } from '../layout/RootLayout';
  */
 const router = createBrowserRouter([
   {
-    // Ruta raíz que utiliza el RootLayout como su elemento principal.
-    path: '/',
-    element: <RootLayout />,
-    // Definición de las rutas hijas que se renderizan dentro del Outlet del RootLayout
+    element: <PublicLayout />,
     children: [
-      {
-        // La ruta index (/) que muestra la HomePage
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        // Ruta para la página de login
-        path: '/login',
-        element: <LoginPage />,
-      },
-      {
-        // Ruta para la página de registro
-        path: '/register',
-        element: <RegisterPage />,
-      },
-      {
-        // Ruta para la página de perfil
-        path: '/profile',
-        element: <ProfilePage />,
-      },
+      { path: '/', element: <HomePage /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'register', element: <RegisterPage /> },
     ],
   },
+  {
+    element: <AppLayout />,
+    children: [{ path: 'me', element: <ProfilePage /> }],
+  },
 ]);
-/**
- * Componente principal de enrutamiento de la aplicación.
- * Proporciona el enrutador a la aplicación mediante el componente RouterProvider.
- */
-export const AppRouter = () => {
-  return <RouterProvider router={router} />;
-};
+export const AppRouter = () => <RouterProvider router={router} />;
