@@ -1,50 +1,53 @@
-import { useMemo, useState } from 'react';
-import { AuthContext, User } from './AuthContext';
+import { useState } from 'react';
+import type { ReactNode } from 'react';
+import { AuthContext } from './AuthContext';
+import type { AuthContextType, AuthState } from './AuthContext';
 
+// Proveedor del contexto de autenticación
 interface AuthProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
-
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [authState, setAuthState] = useState<AuthState>({
+    user: null,
+    accessToken: null,
+    refreshToken: null,
+    isLoading: true,
+  });
 
   const login = async (email: string, password: string) => {
-    console.log('Intentando login con:', email, password); // Mantenemos esto para ver la llamada
-    // SIMULACIÓN DE ERROR: Rechazamos la promesa para probar el 'catch' en LoginPage.
-    return Promise.reject(new Error('Simulated login failure'));
-  };
-
-  const register = async (userData: any) => {
-    console.log('Intentando registrar con:', userData);
-    // SIMULACIÓN DE ÉXITO: Esperamos 1 segundo y luego resolvemos la promesa.
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
+    console.log('Llamando a login con:', { email, password });
+    // Lógica del API ira aquí
+    setAuthState({
+      user: {
+        id: 1,
+        email: 'test@test.com',
+        first_name: 'Test',
+        last_name: 'User',
+      },
+      accessToken: 'fake-access-token',
+      refreshToken: 'fake-refresh-token',
+      isLoading: false,
     });
   };
-
-  const logout = () => {
-    // Lógica de logout
+  const register = async (userData: unknown) => {
+    console.log('Llamando a register con:', userData);
+    // Lógica del API ira aquí
   };
-
-  const contextValue = useMemo(
-    () => ({
-      user,
-      accessToken,
-      refreshToken,
-      isLoading,
-      login,
-      register,
-      logout,
-    }),
-    [user, accessToken, refreshToken, isLoading]
-  );
-
-  return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
-  );
+  const logout = () => {
+    console.log('Llamando a logout');
+    setAuthState({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isLoading: false,
+    });
+  };
+  const value: AuthContextType = {
+    ...authState,
+    login,
+    register,
+    logout,
+  };
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
