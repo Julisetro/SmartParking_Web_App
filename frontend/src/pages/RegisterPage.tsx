@@ -2,6 +2,28 @@ import { Link, useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 
+// Interfaz que describe la estructura de datos de un error de la API
+interface ApiErrorData {
+  [key: string]: string[];
+}
+
+// Interfaz que describe un objeto de error similar a Axios
+interface ApiError {
+  response?: {
+    data?: ApiErrorData;
+  };
+}
+
+// Type Guard: una función que comprueba si 'error' es un ApiError
+const isApiError = (error: unknown): error is ApiError => {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'response' in error &&
+    typeof (error as ApiError).response?.data === 'object'
+  );
+};
+
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -28,22 +50,30 @@ export const RegisterPage = () => {
       return;
     }
 
-    setIsLoading(true);
     setError(null);
+    setIsLoading(true);
 
     try {
       await register(formData);
-      // Si el registro es exitoso, redirigimos al login con un mensaje.
       navigate('/login', {
         state: { message: '¡Registro exitoso! Ahora puedes iniciar sesión.' },
       });
-    } catch (err: any) {
-      // eslint-disable-line
-      // Asumimos que el error del backend viene en un formato manejable
-      const errorMessage =
-        err.response?.data?.email?.[0] ||
-        'Ocurrió un error durante el registro.';
-      setError(errorMessage);
+    } catch (err) {
+      console.error('Error durante el registro:', err);
+
+      let message = 'Ocurrió un error durante el registro.';
+
+      // Usamos el type guard. Si devuelve true, TypeScript sabe que 'err' es de tipo ApiError
+      if (isApiError(err) && err.response?.data) {
+        const { data } = err.response;
+        const firstError = Object.values(data).flat()[0];
+        if (typeof firstError === 'string') {
+          message = firstError;
+        }
+      }
+
+      setError(message);
+    } finally {
       setIsLoading(false);
     }
   };

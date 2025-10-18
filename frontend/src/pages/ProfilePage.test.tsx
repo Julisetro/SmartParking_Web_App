@@ -1,7 +1,11 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { AuthContext, type AuthContextType, type User } from '../features/auth/context/AuthContext';
+import {
+  AuthContext,
+  type AuthContextType,
+  type User,
+} from '../features/auth/context/AuthContext';
 import { ProfilePage } from './ProfilePage';
 import apiClient from '../shared/api/client';
 
@@ -50,7 +54,9 @@ describe('ProfilePage', () => {
     expect(screen.getByText('John')).toBeInTheDocument();
     expect(screen.getByText('Doe')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /guardar cambios/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /guardar cambios/i })
+    ).not.toBeInTheDocument();
   });
 
   it('debería cambiar a modo de edición al hacer clic en Editar', () => {
@@ -59,7 +65,9 @@ describe('ProfilePage', () => {
     const firstNameInput = screen.getByLabelText(/nombre/i);
     expect(firstNameInput).toBeInTheDocument();
     expect(firstNameInput).toHaveValue(mockUser.first_name);
-    expect(screen.getByRole('button', { name: /guardar cambios/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /guardar cambios/i })
+    ).toBeInTheDocument();
   });
 
   it('debería actualizar los datos y mostrar un mensaje de éxito al guardar', async () => {
@@ -83,7 +91,9 @@ describe('ProfilePage', () => {
     // Assert
     // Primero, esperamos el resultado final y más importante: el mensaje de éxito.
     // Si esto aparece, el resto del proceso asíncrono debe haber funcionado.
-    expect(await screen.findByText(/¡Tu información ha sido actualizada con éxito!/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/¡Tu información ha sido actualizada con éxito!/i)
+    ).toBeInTheDocument();
 
     // Ahora, verificamos las llamadas que debieron haber ocurrido.
     expect(apiClient.patch).toHaveBeenCalledWith('/users/me/', {
@@ -94,7 +104,9 @@ describe('ProfilePage', () => {
     expect(mockUpdateUser).toHaveBeenCalledWith(updatedUser);
 
     // Finalmente, verificamos que se regresó a modo lectura.
-    expect(screen.queryByRole('button', { name: /guardar cambios/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /guardar cambios/i })
+    ).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
   });
 });

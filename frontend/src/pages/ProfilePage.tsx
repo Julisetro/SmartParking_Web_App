@@ -47,6 +47,7 @@ export const ProfilePage = () => {
       setSuccess('¡Tu información ha sido actualizada con éxito!');
       setIsEditing(false);
     } catch (err) {
+      console.error('Error al actualizar el perfil de usuario:', err);
       setError('Ocurrió un error al actualizar tu información.');
     } finally {
       setIsLoading(false);

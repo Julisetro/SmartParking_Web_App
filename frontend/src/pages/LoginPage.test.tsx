@@ -8,8 +8,6 @@ import { MemoryRouter } from 'react-router-dom';
 
 //Mock de las funciones del contexto de autenticación
 const mockLogin = vi.fn();
-const mockRegister = vi.fn();
-const mockLogout = vi.fn();
 // Se crea un valor de contexto simulado para el AuthContext
 const mockAuthContextValue: AuthContextType = {
   user: null,
