@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { DashboardPage } from '../../pages/DashboardPage';
 import { HomePage } from '../../pages/HomePage';
 import { LoginPage } from '../../pages/LoginPage';
 import { RegisterPage } from '../../pages/RegisterPage';
@@ -21,7 +22,11 @@ const router = createBrowserRouter([
   },
   {
     element: <AppLayout />,
-    children: [{ path: 'me', element: <ProfilePage /> }],
+    children: [
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'profile', element: <ProfilePage /> },
+    ],
   },
 ]);
+
 export const AppRouter = () => <RouterProvider router={router} />;
