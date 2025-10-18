@@ -38,6 +38,7 @@ export const RegisterPage = () => {
         state: { message: '¡Registro exitoso! Ahora puedes iniciar sesión.' },
       });
     } catch (err: any) {
+      // eslint-disable-line
       // Asumimos que el error del backend viene en un formato manejable
       const errorMessage =
         err.response?.data?.email?.[0] ||
