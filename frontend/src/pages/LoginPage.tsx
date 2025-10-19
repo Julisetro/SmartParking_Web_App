@@ -1,26 +1,32 @@
-import { Link } from 'react-router-dom';
-import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { login, isLoading, user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log('El estado de autenticación ha cambiado:', user);
+    // Si el usuario ya está autenticado, redirigir al dashboard
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
     setError(null);
 
     try {
       await login(email, password);
-      // Si el login es exitoso, el AuthProvider se encargará de redirigir.
-    } catch {
-      // Asumimos que el error tiene un mensaje.
+      // La redirección se manejará con el useEffect de arriba
+    } catch (err) {
+      console.error('Error al iniciar sesión:', err);
       setError('El correo electrónico o la contraseña son incorrectos.');
-      setIsLoading(false);
     }
   };
 

@@ -68,26 +68,24 @@ describe('Pruebas en LoginPage', () => {
   // Prueba para el estado de carga
   it('debe mostrar el estado de carga en el botón mientras se procesa el login', async () => {
     // Arrange: Se simula una promesa que nunca se resuelve para mantener el estado de carga
-    mockLogin.mockReturnValue(new Promise(() => {}));
-    setup();
-    const emailInput = screen.getByLabelText(/Correo Electrónico/i);
-    const passwordInput = screen.getByLabelText(/Contraseña/i);
-    const submitButton = screen.getByRole('button', { name: /Ingresar/i });
-
-    // Act: Se simulan las interacciones del usuario
-    await userEvent.type(emailInput, 'test@example.com');
-    await userEvent.type(passwordInput, 'password123');
-    await userEvent.click(submitButton);
-
-    // Assert: Se espera que el botón cambie su estado a deshabilitado y su texto sea "Ingresando...".
-    await waitFor(() => {
-      // Se busca el botón con su nuevo texto y estado
-      const loadingButton = screen.getByRole('button', {
-        name: 'Ingresando...',
-      });
-      // Se verifica que este deshabilitado para prevenir multiples envios
-      expect(loadingButton).toBeDisabled();
+    const loadingContextValue: AuthContextType = {
+      ...mockAuthContextValue,
+      isLoading: true,
+    };
+    // Act: Renderizamos el componente con el contexto de carga
+    render(
+      <MemoryRouter>
+        <AuthContext.Provider value={loadingContextValue}>
+          <LoginPage />
+        </AuthContext.Provider>
+      </MemoryRouter>
+    );
+    // Assert: Verificamos que el botón esté en su estado de carga
+    const loadingButton = screen.getByRole('button', {
+      name: /Ingresando.../i,
     });
+    expect(loadingButton).toBeInTheDocument();
+    expect(loadingButton).toBeDisabled();
   });
 
   // Prueba para el estado de error.

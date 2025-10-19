@@ -18,7 +18,7 @@ export interface AuthState {
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (userData: unknown) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   updateUser: (updatedUserData: Partial<User>) => void; // Añadir esta línea
 }
 // Creación y exportación del Contexto

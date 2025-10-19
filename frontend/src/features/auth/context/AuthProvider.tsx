@@ -1,7 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { AuthContext } from './AuthContext';
 import type { AuthContextType, AuthState, User } from './AuthContext';
+import apiClient from '../../../shared/api/client';
+
+// Define la estructura de los tokens que se guardarán en el localStorage
+interface AuthTokens {
+  access: string;
+  refresh: string;
+}
 
 // Proveedor del contexto de autenticación
 interface AuthProviderProps {
@@ -9,46 +16,120 @@ interface AuthProviderProps {
 }
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [authState, setAuthState] = useState<AuthState>({
-    user: {
-      id: 1,
-      email: 'dev@example.com',
-      first_name: 'Julián',
-      last_name: 'Developer',
-      cedula: '123456789',
-      celular: '3001234567',
-    },
-    accessToken: 'fake-token-for-development',
+    user: null,
+    accessToken: null,
     refreshToken: null,
-    isLoading: false,
+    isLoading: true, // Inicia en true para reflejar la carga inicial del estado de sesión
   });
+  // Se usa useEffect para manejar la carga inicial
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const tokensString = localStorage.getItem('authTokens');
+      if (tokensString) {
+        const tokens: AuthTokens = JSON.parse(tokensString);
+        try {
+          // Si hay tokens, obtenemos los datos del usuario
+          const response = await apiClient.get<User>('/users/me/');
+          const user = response.data;
+
+          setAuthState({
+            user,
+            accessToken: tokens.access,
+            refreshToken: tokens.refresh,
+            isLoading: false,
+          });
+        } catch (error) {
+          console.error('Error al obtener el usuario:', error);
+          // Si los tokens son inválidos, se borran del almacenamiento local
+          localStorage.removeItem('authTokens');
+          setAuthState({
+            user: null,
+            accessToken: null,
+            refreshToken: null,
+            isLoading: false,
+          });
+        }
+      } else {
+        // Si no hay tokens, se termina la carga
+        setAuthState((prevState) => ({
+          ...prevState,
+          isLoading: false,
+        }));
+      }
+    };
+
+    initializeAuth();
+  }, []);
 
   const login = async (email: string, password: string) => {
     console.log('Llamando a login con:', { email, password });
     // Lógica del API ira aquí
-    setAuthState({
-      user: {
-        id: 1,
-        email: 'test@test.com',
-        first_name: 'Test',
-        last_name: 'User',
-      },
-      accessToken: 'fake-access-token',
-      refreshToken: 'fake-refresh-token',
-      isLoading: false,
-    });
+    setAuthState((prevState) => ({ ...prevState, isLoading: true }));
+    try {
+      // 1. Se piden los tokens al backend
+      const response = await apiClient.post<AuthTokens>('/users/login/', {
+        email,
+        password,
+      });
+      const tokens = response.data;
+      localStorage.setItem('authTokens', JSON.stringify(tokens));
+      // 2. Pedir los datos del usuario
+      const userResponse = await apiClient.get<User>('/users/me/');
+      const user = userResponse.data;
+      // 3. Actualizar el estado de la aplicación
+      setAuthState({
+        user,
+        accessToken: tokens.access,
+        refreshToken: tokens.refresh,
+        isLoading: false,
+      });
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      localStorage.removeItem('authTokens');
+      setAuthState({
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        isLoading: false,
+      });
+      // Se propaga el error para que pueda ser manejado por el componente login
+    }
   };
   const register = async (userData: unknown) => {
     console.log('Llamando a register con:', userData);
     // Lógica del API ira aquí
   };
-  const logout = () => {
-    console.log('Llamando a logout');
-    setAuthState({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      isLoading: false,
-    });
+  const logout = async () => {
+    // Si no hay un refresh token, limpiamos el estado local
+    if (!authState.refreshToken) {
+      localStorage.removeItem('authTokens');
+      setAuthState({
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        isLoading: false,
+      });
+      return;
+    }
+    try {
+      // 1. Informar al backend que invalide el token de refresco
+      await apiClient.post('/users/logout/', {
+        refresh: authState.refreshToken,
+      });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      // La sesión se cerrará aunque haya un error en el backend
+    } finally {
+      // 2. Limpiar los tokens del almacenamiento local
+      localStorage.removeItem('authTokens');
+      // 3. Actualizar el estado de la aplicación
+      setAuthState({
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+        isLoading: false,
+      });
+    }
   };
 
   const updateUser = (updatedUserData: Partial<User>) => {

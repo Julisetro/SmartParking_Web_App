@@ -6,6 +6,7 @@ import { RegisterPage } from '../../pages/RegisterPage';
 import { ProfilePage } from '../../pages/ProfilePage';
 import { AppLayout } from '../layout/AppLayout';
 import { PublicLayout } from '../layout/PublicLayout';
+import { ProtectedRoute } from './ProtectedRoute';
 
 /**
  * Definición de las rutas de la aplicación.
@@ -21,10 +22,15 @@ const router = createBrowserRouter([
     ],
   },
   {
-    element: <AppLayout />,
+    element: <ProtectedRoute />,
     children: [
-      { path: 'dashboard', element: <DashboardPage /> },
-      { path: 'profile', element: <ProfilePage /> },
+      {
+        element: <AppLayout />,
+        children: [
+          { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'profile', element: <ProfilePage /> },
+        ],
+      },
     ],
   },
 ]);
