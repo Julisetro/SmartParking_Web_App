@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { AuthContext } from './AuthContext';
 import type { AuthContextType, AuthState, User } from './AuthContext';
 import apiClient from '../../../shared/api/client';
+import { registerUser } from '../api/auth';
+import type { UserRegistrationData } from '../types/authTypes';
 
 // Define la estructura de los tokens que se guardarán en el localStorage
 interface AuthTokens {
@@ -61,7 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initializeAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<void> => {
     console.log('Llamando a login con:', { email, password });
     // Lógica del API ira aquí
     setAuthState((prevState) => ({ ...prevState, isLoading: true }));
@@ -95,11 +97,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Se propaga el error para que pueda ser manejado por el componente login
     }
   };
-  const register = async (userData: unknown) => {
-    console.log('Llamando a register con:', userData);
-    // Lógica del API ira aquí
+  const register = async (userData: UserRegistrationData): Promise<void> => {
+    // Se usa await para esperar a que la llamada a la API termine
+    // Si la llamada falla, lanzara una excepción y se capturara en el bloque catch en RegisterPage.tsx
+    await registerUser(userData);
   };
-  const logout = async () => {
+  const logout = async (): Promise<void> => {
     // Si no hay un refresh token, limpiamos el estado local
     if (!authState.refreshToken) {
       localStorage.removeItem('authTokens');

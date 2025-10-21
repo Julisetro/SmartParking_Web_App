@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
+import { ChangePasswordModal } from '../features/profile/components/ChangePasswordModal';
 import apiClient from '../shared/api/client';
 
 // Componente para una fila de información en el perfil
@@ -20,6 +21,7 @@ export const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   // Efecto para inicializar el formulario cuando los datos del usuario están disponibles
   useEffect(() => {
@@ -179,13 +181,23 @@ export const ProfilePage = () => {
                 sitios.
               </p>
             </div>
-            <button className="rounded-md bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-200">
+            <button
+              type="button"
+              onClick={() => setIsPasswordModalOpen(true)}
+              className="rounded-md bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-200"
+            >
               Actualizar
             </button>
           </div>
           {/* Aquí irían las otras opciones de seguridad */}
         </div>
       </div>
+      {isPasswordModalOpen && (
+        <ChangePasswordModal
+          isOpen={isPasswordModalOpen}
+          onClose={() => setIsPasswordModalOpen(false)}
+        />
+      )}
     </div>
   );
 };

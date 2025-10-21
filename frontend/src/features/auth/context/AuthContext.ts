@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+import type { UserRegistrationData } from '../types/authTypes';
 
 // Definición de Tipos
 export interface User {
@@ -17,7 +18,7 @@ export interface AuthState {
 }
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: unknown) => Promise<void>;
+  register: (userData: UserRegistrationData) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (updatedUserData: Partial<User>) => void; // Añadir esta línea
 }
