@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { ChangePasswordModal } from '../features/profile/components/ChangePasswordModal';
-import apiClient from '../shared/api/client';
+import { updateUserProfile } from '../features/profile/api/profileApi';
 
 // Componente para una fila de información en el perfil
 const InfoRow = ({ label, value }: { label: string; value: string }) => (
@@ -12,7 +12,7 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => (
 );
 
 export const ProfilePage = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser: updateUserContext } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
@@ -44,8 +44,8 @@ export const ProfilePage = () => {
     setSuccess(null);
 
     try {
-      const response = await apiClient.patch('/users/me/', formData);
-      updateUser(response.data);
+      const updateUser = await updateUserProfile(formData);
+      updateUserContext(updateUser);
       setSuccess('¡Tu información ha sido actualizada con éxito!');
       setIsEditing(false);
     } catch (err) {

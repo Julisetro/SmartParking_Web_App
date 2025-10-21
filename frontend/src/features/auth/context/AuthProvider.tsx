@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { AuthContext } from './AuthContext';
 import type { AuthContextType, AuthState, User } from './AuthContext';
 import apiClient from '../../../shared/api/client';
-import { registerUser } from '../api/auth';
+import { registerUser, loginUser, logoutUser } from '../api/auth';
 import type { UserRegistrationData } from '../types/authTypes';
 
 // Define la estructura de los tokens que se guardarán en el localStorage
@@ -65,15 +65,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string): Promise<void> => {
     console.log('Llamando a login con:', { email, password });
-    // Lógica del API ira aquí
     setAuthState((prevState) => ({ ...prevState, isLoading: true }));
     try {
       // 1. Se piden los tokens al backend
-      const response = await apiClient.post<AuthTokens>('/users/login/', {
-        email,
-        password,
-      });
-      const tokens = response.data;
+      const tokens = await loginUser(email, password);
       localStorage.setItem('authTokens', JSON.stringify(tokens));
       // 2. Pedir los datos del usuario
       const userResponse = await apiClient.get<User>('/users/me/');
@@ -95,6 +90,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         isLoading: false,
       });
       // Se propaga el error para que pueda ser manejado por el componente login
+      throw error;
     }
   };
   const register = async (userData: UserRegistrationData): Promise<void> => {
@@ -116,9 +112,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
     try {
       // 1. Informar al backend que invalide el token de refresco
-      await apiClient.post('/users/logout/', {
-        refresh: authState.refreshToken,
-      });
+      await logoutUser(authState.refreshToken);
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
       // La sesión se cerrará aunque haya un error en el backend

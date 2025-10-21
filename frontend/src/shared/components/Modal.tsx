@@ -19,9 +19,8 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
   // Esto evita problemas de apilamiento (z-index) y estilos del contenedor padre.
   return ReactDOM.createPortal(
     // Contenedor principal: es el backdrop y el contenedor flex que centra el contenido.
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 transition-opacity"
-          >      {/* Panel del Modal: es el hijo directo del contenedor. */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 transition-opacity">
+      {/* Panel del Modal: es el hijo directo del contenedor. */}
       <div
         className="relative w-full max-w-lg rounded-lg bg-background p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()} // Evita que los clics dentro del modal se propaguen al padre.
@@ -52,7 +51,6 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
             </svg>
           </button>
         </div>
-
         {/* Cuerpo del Modal: aquí se renderiza el contenido (children). */}
         <div className="mt-4">{children}</div>
       </div>

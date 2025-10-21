@@ -20,7 +20,7 @@ export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (userData: UserRegistrationData) => Promise<void>;
   logout: () => Promise<void>;
-  updateUser: (updatedUserData: Partial<User>) => void; // Añadir esta línea
+  updateUser: (updatedUserData: Partial<User>) => void;
 }
 // Creación y exportación del Contexto
 export const AuthContext = createContext<AuthContextType | undefined>(

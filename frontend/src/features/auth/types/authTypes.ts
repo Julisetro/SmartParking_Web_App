@@ -10,3 +10,9 @@ export interface UserRegistrationData {
   cedula: string;
   celular: string;
 }
+
+// Interfaz para los tokens de autentificación que se espera del backend
+export interface AuthTokens {
+  access: string;
+  refresh: string;
+}
