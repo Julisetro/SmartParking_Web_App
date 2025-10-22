@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { ChangePasswordModal } from '../features/profile/components/ChangePasswordModal';
 import { ChangeEmailModal } from '../features/profile/components/ChangeEmailModal';
+import { ChangeCelularModal } from '../features/profile/components/ChangeCelularModal';
 import { updateUserProfile } from '../features/profile/api/profileApi';
 
 // Componente para una fila de información en el perfil
@@ -24,6 +25,7 @@ export const ProfilePage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isChangeEmailModalOpen, setIsChangeEmailModalOpen] = useState(false);
+  const [isCelularModalOpen, setIsCelularModalOpen] = useState(false);
 
   // Efecto para inicializar el formulario cuando los datos del usuario están disponibles
   useEffect(() => {
@@ -57,9 +59,16 @@ export const ProfilePage = () => {
       setIsLoading(false);
     }
   };
+  // Funcion para manejar el éxito del cambio de celular.
+  // Pasará como prop al modal
+  const handleCelularChangeSuccess = () => {
+    alert('¡Celular cambiado con éxito!');
+    setIsCelularModalOpen(false);
+    window.location.reload();
+  };
 
   if (!user) {
-    return <div>Cargando perfil...</div>; // O un spinner de carga
+    return <div>Cargando perfil...</div>; // carga el perfil
   }
 
   return (
@@ -72,7 +81,6 @@ export const ProfilePage = () => {
           Gestiona tu información personal y de seguridad.
         </p>
       </div>
-
       {/* Sección de Información Personal */}
       <div className="rounded-lg bg-white p-6 shadow-md">
         <form onSubmit={handleSubmit}>
@@ -168,13 +176,13 @@ export const ProfilePage = () => {
           {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
         </form>
       </div>
-
       {/* Sección de Seguridad (Placeholder) */}
       <div className="rounded-lg bg-white p-6 shadow-md">
         <div className="border-b border-gray-200 pb-4">
           <h2 className="text-xl font-bold text-text-main">Seguridad</h2>
         </div>
         <div className="mt-6 space-y-4">
+          {/* Cambiar contraseña */}
           <div className="flex justify-between items-center">
             <div>
               <p className="font-medium text-gray-900">Cambiar Contraseña</p>
@@ -185,13 +193,14 @@ export const ProfilePage = () => {
             </div>
             <button
               type="button"
-              onClick={() => setIsPasswordModalOpen(true)}
+              onClick={() => setIsPasswordModalOpen(true)} // Abre el modal
               className="rounded-md bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-200"
             >
               Actualizar
             </button>
           </div>
           {/* Aquí irían las otras opciones de seguridad */}
+          {/* Cambiar email */}
           <div className="flex justify-between items-center border-t border-gray-200 pt-6">
             <div>
               <p className="font-medium text-gray-900">Cambiar Email</p>
@@ -202,6 +211,22 @@ export const ProfilePage = () => {
             <button
               type="button"
               onClick={() => setIsChangeEmailModalOpen(true)}
+              className="rounded-md bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-200"
+            >
+              Actualizar
+            </button>
+          </div>
+          {/* Cambiar Celular */}
+          <div className="flex justify-between items-center border-t border-gray-200 pt-6">
+            <div>
+              <p className="font-medium text-gray-900">Cambiar Celular</p>
+              <p className="text-sm text-gray-500">
+                Actualiza el número de celular asociado a tu cuenta.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsCelularModalOpen(true)} // Abre el modal
               className="rounded-md bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-200"
             >
               Actualizar
@@ -219,6 +244,13 @@ export const ProfilePage = () => {
         <ChangeEmailModal
           isOpen={isChangeEmailModalOpen}
           onClose={() => setIsChangeEmailModalOpen(false)}
+        />
+      )}
+      {isCelularModalOpen && (
+        <ChangeCelularModal
+          isOpen={isCelularModalOpen}
+          onClose={() => setIsCelularModalOpen(false)}
+          onSuccess={handleCelularChangeSuccess}
         />
       )}
     </div>

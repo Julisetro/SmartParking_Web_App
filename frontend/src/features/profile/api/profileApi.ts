@@ -2,6 +2,8 @@ import apiClient from '../../../shared/api/client';
 import type {
   ChangePasswordData,
   ChangeEmailData,
+  ChangeCelularData,
+  ChangeCelularConfirmData,
 } from '../components/types/profileTypes';
 import type { User } from '../../auth/context/AuthContext';
 
@@ -43,4 +45,32 @@ export const changeEmail = async (data: ChangeEmailData): Promise<void> => {
   // La ruta '/users/change-email/' se concatena con la URL base configurada en apiClient.
   // El objeto 'data' se envía como el cuerpo (body) de la petición en formato JSON.
   await apiClient.post('/users/change-email/', data);
+};
+
+/**
+ * LLama a la API del backend para cambiar el celular del usuario autenticado.
+ * @param data - Un objeto que contiene la contraseña actual y el nuevo celular.
+ * Debe coincider con la estructura que espera ChangeCelularData
+ * @returns Una promesa que resuelve con 'void' si la operacion es exitosa
+ */
+export const changeCelular = async (data: ChangeCelularData): Promise<void> => {
+  // Usamos el apiClient para enviar una petición POST al endpoint correspondiente del backend
+  // La ruta '/users/change-celular/' se concatena con la URL base configurada en apiClient.
+  // El objeto 'data' se envía como el cuerpo (body) de la petición en formato JSON.
+  await apiClient.post('/users/change-celular/', data);
+};
+
+/**
+ * Envía el codigo de verificación al backend para confirmar y finalizar el cambio de numero de celular.
+ * @param data - Un objeto que contiene el codigo de verificación.
+ * Debe coincider con la estructura que espera ChangeCelularConfirmData
+ * @returns Una promesa que resuelve con 'void' si la operacion es exitosa
+ */
+export const changeCelularConfirm = async (
+  data: ChangeCelularConfirmData
+): Promise<void> => {
+  // Usamos el apiClient para enviar una petición POST al endpoint correspondiente del backend
+  // La ruta '/users/confirm-celular/' se concatena con la URL base configurada en apiClient.
+  // El objeto 'data' se envía como el cuerpo (body) de la petición en formato JSON.
+  await apiClient.post('/users/change-celular/confirm/', data);
 };
