@@ -4,7 +4,7 @@ import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
 /**
  * URL base para todas las peticiones de la API del backend.
  */
-const BASE_URL = 'http://127.0.0.1:8000/api';
+const BASE_URL = 'http://localhost:8000/api';
 /**
  * Instancia de Axios configurada para interactuar con la API del backend.
  * Esto permite encapsular la configuración especifica de nuestra API
@@ -15,6 +15,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Permite que axios envíe cookies en peticiones cross-origin
 });
 /**
  * Interceptor de peticiones (Request Interceptor) que se ejecuta antes de cada

@@ -1,5 +1,8 @@
 import apiClient from '../../../shared/api/client';
-import type { ChangePasswordData } from '../components/types/profileTypes';
+import type {
+  ChangePasswordData,
+  ChangeEmailData,
+} from '../components/types/profileTypes';
 import type { User } from '../../auth/context/AuthContext';
 
 /**
@@ -27,4 +30,17 @@ export const updateUserProfile = async (
   // El apiClient se encarga de enviar la petición a la URL base + la ruta especificada
   const response = await apiClient.put<User>('/users/me/', userData);
   return response.data;
+};
+
+/**
+ * LLama a la API del backend para cambiar el correo del usuario autenticado.
+ * @param data - Un objeto que contiene la contraseña actual y el nuevo email.
+ * Debe coincider con la estructura que espera ChangeEmailData
+ * @returns Una promesa que resuelve con 'void' si la operacion es exitosa
+ */
+export const changeEmail = async (data: ChangeEmailData): Promise<void> => {
+  // Usamos el apiClient para enviar una petición POST a la URL del backend.
+  // La ruta '/users/change-email/' se concatena con la URL base configurada en apiClient.
+  // El objeto 'data' se envía como el cuerpo (body) de la petición en formato JSON.
+  await apiClient.post('/users/change-email/', data);
 };

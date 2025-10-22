@@ -36,6 +36,9 @@ ALLOWED_HOSTS = []
 # Configuracion CORS
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
 
+# Configuracion CORS para permitir cookies
+CORS_ALLOW_CREDENTIALS = True
+
 
 # Application definition
 

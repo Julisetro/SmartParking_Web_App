@@ -119,6 +119,7 @@ class ChangeEmailRequestView(generics.UpdateAPIView):
             )
         # 2. Guardamos el nuevo email en el usuario para usarlo en el link de confirmacion #noqa: E501
         request.session["new_email_for_change"] = new_email
+
         # 3. Generamos el token de confirmacion
         token_generator = PasswordResetTokenGenerator()
         uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
@@ -164,27 +165,39 @@ class ChangeEmailConfirmView(generics.GenericAPIView):
         new_email = request.session.get("new_email_for_change")
 
         token_generator = PasswordResetTokenGenerator()
+
         if (
             user is not None
             and token_generator.check_token(user, token)
             and new_email is not None
         ):  # noqa: E501
+
             # Verificamos que el nuevo email no haya sido tomado mientras tanto
+
             if CustomUser.objects.filter(email__iexact=new_email).exists():
+
                 return Response(
                     {"detail": "Este correo electrónico ya está en uso."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
             # Si el token es válido, actualizamos el email
+
             user.email = new_email
+
             user.username = new_email
+
             user.save()
+
             # Limpiamos el nuevo email de la sesión
+
             del request.session["new_email_for_change"]
+
             return Response(
                 {"detail": "Correo electrónico actualizado con éxito."},
                 status=status.HTTP_200_OK,
             )
+
         return Response(
             {"detail": "El enlace de confirmación es inválido o ha expirado."},
             status=status.HTTP_400_BAD_REQUEST,

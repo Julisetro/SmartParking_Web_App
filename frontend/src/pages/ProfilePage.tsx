@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { ChangePasswordModal } from '../features/profile/components/ChangePasswordModal';
+import { ChangeEmailModal } from '../features/profile/components/ChangeEmailModal';
 import { updateUserProfile } from '../features/profile/api/profileApi';
 
 // Componente para una fila de información en el perfil
@@ -22,6 +23,7 @@ export const ProfilePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isChangeEmailModalOpen, setIsChangeEmailModalOpen] = useState(false);
 
   // Efecto para inicializar el formulario cuando los datos del usuario están disponibles
   useEffect(() => {
@@ -190,12 +192,33 @@ export const ProfilePage = () => {
             </button>
           </div>
           {/* Aquí irían las otras opciones de seguridad */}
+          <div className="flex justify-between items-center border-t border-gray-200 pt-6">
+            <div>
+              <p className="font-medium text-gray-900">Cambiar Email</p>
+              <p className="text-sm text-gray-500">
+                Se recomienda usar un email seguro que no uses en otros sitios.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsChangeEmailModalOpen(true)}
+              className="rounded-md bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-200"
+            >
+              Actualizar
+            </button>
+          </div>
         </div>
       </div>
       {isPasswordModalOpen && (
         <ChangePasswordModal
           isOpen={isPasswordModalOpen}
           onClose={() => setIsPasswordModalOpen(false)}
+        />
+      )}
+      {isChangeEmailModalOpen && (
+        <ChangeEmailModal
+          isOpen={isChangeEmailModalOpen}
+          onClose={() => setIsChangeEmailModalOpen(false)}
         />
       )}
     </div>
