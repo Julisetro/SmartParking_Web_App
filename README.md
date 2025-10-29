@@ -28,6 +28,7 @@ Asegúrate de tener instalado lo siguiente en tu sistema:
 ## Instalación y Puesta en Marcha
 
 Sigue estos pasos para configurar el entorno de desarrollo local.
+La rama activa actualmente es la rama develop
 
 ### 1. Clonar el Repositorio
 
