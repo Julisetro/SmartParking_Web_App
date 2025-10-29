@@ -32,8 +32,16 @@ Sigue estos pasos para configurar el entorno de desarrollo local.
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/smart_parking_web_app.git
-cd smart_parking_web_app
+git clone https://github.com/Julisetro/SmartParking_Web_App
+cd SmartParking_Web_App
+git checkout develop
+```
+
+O también:
+
+```bash
+git clone -b develop https://github.com/Julisetro/SmartParking_Web_App
+cd SmartParking_Web_App
 ```
 
 ### 2. Configuración de la Base de Datos (MySQL)
