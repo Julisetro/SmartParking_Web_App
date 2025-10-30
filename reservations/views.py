@@ -43,6 +43,7 @@ class ReservaViewSet(viewsets.ModelViewSet):
         serializer.save(
             user=self.request.user,
             estado=estado_inicial,
-            tarifa_hora=tarifa_actual,
             codigo_qr=codigo_qr_único,
+            tarifa_hora=tarifa_actual,
+            total_pago=0.00,  # Valor inicial para el total a pagar
         )

@@ -22,4 +22,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # Incluye las rutas definidas en la aplicación "users"
     path("api/users/", include("users.urls")),
+    # Incluye las rutas definidas en la aplicación "reservations"
+    path("api/", include("reservations.urls")),
 ]
