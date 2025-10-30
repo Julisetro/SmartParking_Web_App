@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from reservations.logic import should_expire
 from reservations.models import EstadoReserva, Reserva
 
 
@@ -45,17 +46,10 @@ class Command(BaseCommand):
 
         # Iteramos sobre las reservas candidatas
         for reserva in reservas_a_expirar:
-            # Combinamos la fecha y la hora de la reserva en un único objeto datetime
-            # para poder compararlo
-            # Se usa timezone.make_aware para asegurar que el datetime es consciente de la zona horaria # noqa: E501
-            reserva_datetime = timezone.make_aware(
-                timezone.datetime.combine(reserva.fecha, reserva.hora_inicio)
-            )
-
             # Condicion principal:
             # Si la hora actual es mayor a la hora de inicio + periodo de gracia
             # entonces la reserva expira
-            if now > reserva_datetime + periodo_gracia:
+            if should_expire(reserva, now, periodo_gracia):
                 # Actualizamos el estado de la reserva a "Expirada"
                 reserva.estado = estado_expirada
                 # Se guarda el cambio en la base de datos
