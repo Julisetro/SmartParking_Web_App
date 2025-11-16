@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -631,3 +632,226 @@ class ChangeEmailIntegrationTest(APITestCase):
         # Verificamos que el email del usuario original no haya cambiado
         self.user.refresh_from_db()
         self.assertNotEqual(self.user.email, new_email)
+
+
+class ChangeCelularIntegrationTest(APITestCase):
+    """
+    Pruebas de Integración para el flujo completo de cambio de número de celular.
+    Verifica tanto la solicitud como la confirmación del cambio.
+    """
+
+    def setUp(self):
+        """
+        Crea un usuario de prueba, lo autentica y define las URLs para los tests.
+        """
+        self.password = "TestPassword123"
+        self.user = CustomUser.objects.create_user(
+            email="change_celular_user@example.com",
+            username="change_celular_user@example.com",
+            password=self.password,
+            celular="3000000000",
+        )
+        self.client.force_authenticate(user=self.user)
+        self.request_url = reverse("celular-change-request")
+        self.confirm_url = reverse("celular-change-confirm")
+
+    @patch("users.views.print")
+    def test_celular_change_request_successful(self, mock_print):
+        """
+        Verifica que una solicitud de cambio de celular exitosa inicie el
+        proceso, guarde los datos en sesión y simule el envío del SMS.
+        """
+        new_celular = "3111111111"
+        data = {"password": self.password, "new_celular": new_celular}
+
+        response = self.client.post(self.request_url, data, format="json")
+
+        # 1. Verificar que la respuesta sea 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("código de verificación", response.data["detail"])
+
+        # 2. Verificar que los datos se guardaron en la sesión
+        session = self.client.session
+        self.assertEqual(session.get("new_celular_for_change"), new_celular)
+        self.assertIsNotNone(session.get("celular_verification_code"))
+        self.assertIsNotNone(session.get("celular_code_expires"))
+
+        # 3. Verificar que se intentó "enviar" el SMS (llamando a print)
+        self.assertTrue(mock_print.called)
+
+        # 4. Verificar que el número de celular aún no ha cambiado en la BD
+        self.user.refresh_from_db()
+        self.assertNotEqual(self.user.celular, new_celular)
+
+    def test_celular_change_request_fails_with_incorrect_password(self):
+        """
+        Verifica que la solicitud falle si la contraseña proporcionada es incorrecta.
+        """
+        data = {"password": "WrongPassword", "new_celular": "3222222222"}
+        response = self.client.post(self.request_url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("password", response.data)
+        self.assertIsNone(self.client.session.get("new_celular_for_change"))
+
+    def test_celular_change_request_fails_if_celular_is_taken(self):
+        """
+        Verifica que la solicitud falle si el nuevo número ya está en uso.
+        """
+        taken_celular = "3999999999"
+        CustomUser.objects.create_user(
+            email="other@example.com",
+            username="other@example.com",
+            password="password",
+            celular=taken_celular,
+        )
+
+        data = {"password": self.password, "new_celular": taken_celular}
+        response = self.client.post(self.request_url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("new_celular", response.data)
+
+    def test_full_celular_change_flow_is_successful(self):
+        """
+        Prueba el flujo completo: solicitud y confirmación exitosa.
+        """
+        # --- 1. Solicitar el cambio ---
+        new_celular = "3333333333"
+        request_data = {"password": self.password, "new_celular": new_celular}
+
+        # Es necesario guardar la sesión explícitamente para que los datos
+        # persistan entre las dos peticiones de la prueba.
+        session = self.client.session
+        session.save()
+
+        response = self.client.post(self.request_url, request_data, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # --- 2. Confirmar el cambio ---
+        # Recuperamos el código de la sesión para simular que el usuario lo ingresa
+        verification_code = self.client.session.get("celular_verification_code")
+        confirm_data = {"verification_code": verification_code}
+
+        confirm_response = self.client.post(
+            self.confirm_url, confirm_data, format="json"
+        )
+
+        # Verificar que la confirmación fue exitosa
+        self.assertEqual(confirm_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            confirm_response.data["detail"], "Número de celular actualizado con éxito."
+        )
+
+        # Verificar que el celular se actualizó en la base de datos
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.celular, new_celular)
+
+        # Verificar que los datos de la sesión se limpiaron
+        session = self.client.session
+        self.assertIsNone(session.get("new_celular_for_change"))
+        self.assertIsNone(session.get("celular_verification_code"))
+
+    def test_celular_change_confirmation_fails_with_invalid_code(self):
+        """
+        Verifica que la confirmación falle si el código es incorrecto.
+        """
+        # Iniciamos el proceso para tener datos en sesión
+        self.client.post(
+            self.request_url,
+            {"password": self.password, "new_celular": "3444444444"},
+            format="json",
+        )
+
+        confirm_data = {"verification_code": "000000"}  # Código incorrecto
+        response = self.client.post(self.confirm_url, confirm_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("verification_code", response.data)
+        self.user.refresh_from_db()
+        self.assertNotEqual(self.user.celular, "3444444444")
+
+    def test_celular_change_confirmation_fails_if_no_request_in_session(self):
+        """
+        Verifica que la confirmación falle si no hay un proceso de cambio activo.
+        """
+        # Nos aseguramos de que la sesión esté vacía
+        session = self.client.session
+        if "new_celular_for_change" in session:
+            del session["new_celular_for_change"]
+        session.save()
+
+        response = self.client.post(
+            self.confirm_url, {"verification_code": "123456"}, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("No hay un proceso", response.data["detail"])
+
+    def test_celular_change_confirmation_fails_with_expired_code(self):
+        """
+        Verifica que la confirmación falle si el código de verificación ha expirado.
+        """
+        # 1. Iniciar el proceso
+        self.client.post(
+            self.request_url,
+            {"password": self.password, "new_celular": "3555555555"},
+            format="json",
+        )
+
+        # 2. Modificar la sesión para que el código parezca expirado
+        session = self.client.session
+        # Simulamos que el código se generó hace 10 minutos
+        expired_time = (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat()
+        session["celular_code_expires"] = expired_time
+        session.save()
+
+        verification_code = session.get("celular_verification_code")
+        confirm_data = {"verification_code": verification_code}
+
+        # 3. Intentar confirmar
+        response = self.client.post(self.confirm_url, confirm_data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["detail"], "El código de verificación ha expirado."
+        )
+
+    def test_celular_change_fails_if_celular_is_taken_in_meantime(self):
+        """
+        Verifica que la confirmación falle si el número es tomado por otro
+        usuario antes de que se confirme el cambio.
+        """
+        new_celular = "3666666666"
+
+        # 1. Iniciar el proceso de cambio
+        session = self.client.session
+        session.save()
+        self.client.post(
+            self.request_url,
+            {"password": self.password, "new_celular": new_celular},
+            format="json",
+        )
+        verification_code = self.client.session.get("celular_verification_code")
+
+        # 2. Otro usuario toma el número de celular
+        CustomUser.objects.create_user(
+            email="meantime@example.com",
+            username="meantime@example.com",
+            password="password",
+            celular=new_celular,
+        )
+
+        # 3. El usuario original intenta confirmar
+        response = self.client.post(
+            self.confirm_url, {"verification_code": verification_code}, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.data["detail"], "Este número de celular ya está en uso."
+        )
+
+        # Verificar que el celular del usuario original no cambió
+        self.user.refresh_from_db()
+        self.assertNotEqual(self.user.celular, new_celular)

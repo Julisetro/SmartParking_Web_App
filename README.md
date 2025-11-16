@@ -105,6 +105,40 @@ npm run dev
 
 El frontend estará disponible en `http://localhost:5173` (o el puerto que indique Vite).
 
+## Pruebas (Testing)
+
+El backend del proyecto incluye un conjunto de pruebas para garantizar la calidad y el correcto funcionamiento de la API. Utilizamos el framework de pruebas incorporado de Django.
+
+### Ejecutar las Pruebas del Backend
+
+Asegúrate de tener tu entorno virtual activado y las dependencias instaladas.
+
+**1. Para ejecutar todas las pruebas del proyecto:**
+
+Este comando descubrirá y ejecutará todas las pruebas en todas las aplicaciones del proyecto.
+
+```bash
+# En Windows
+.\venv\Scripts\python.exe manage.py test
+
+# En macOS/Linux
+python manage.py test
+```
+
+**2. Para ejecutar las pruebas de una aplicación específica:**
+
+Puedes limitar la ejecución a una sola aplicación para agilizar el proceso de desarrollo.
+
+```bash
+# Ejemplo para la aplicación 'users' en Windows
+.\venv\Scripts\python.exe manage.py test users
+
+# Ejemplo para la aplicación 'reservations' en Windows
+.\venv\Scripts\python.exe manage.py test reservations
+```
+
+En macOS/Linux, simplemente reemplaza `.\venv\Scripts\python.exe` por `python`.
+
 ## Uso de la Aplicación
 
 Una vez que la aplicación esté corriendo (tanto el frontend como el backend), sigue estos pasos:
