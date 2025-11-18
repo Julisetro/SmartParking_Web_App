@@ -4,6 +4,7 @@ import { HomePage } from '../../pages/HomePage';
 import { LoginPage } from '../../pages/LoginPage';
 import { RegisterPage } from '../../pages/RegisterPage';
 import { ProfilePage } from '../../pages/ProfilePage';
+import ReservationsPage from '../../pages/ReservationsPage';
 import { AppLayout } from '../layout/AppLayout';
 import { PublicLayout } from '../layout/PublicLayout';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
         children: [
           { path: 'dashboard', element: <DashboardPage /> },
           { path: 'profile', element: <ProfilePage /> },
+          { path: 'reservations', element: <ReservationsPage /> },
         ],
       },
     ],
