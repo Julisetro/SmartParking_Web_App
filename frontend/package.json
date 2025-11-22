@@ -14,8 +14,12 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@types/qrcode.react": "^1.0.5",
+    "@types/react-datepicker": "^6.2.0",
     "axios": "^1.12.2",
+    "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
+    "react-datepicker": "^8.9.0",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.4"
   },

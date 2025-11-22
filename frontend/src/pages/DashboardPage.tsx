@@ -1,4 +1,7 @@
 import { useAuth } from '../features/auth/hooks/useAuth';
+import { useReservations } from '../features/reservations/hooks/useReservations';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 
 // Componente reutilizable para las tarjetas del dashboard
 const DashboardCard = ({
@@ -14,10 +17,92 @@ const DashboardCard = ({
   </div>
 );
 
+// Subcomponente para renderizar el contenido de la tarjeta "Próxima Reserva"
+const NextReservationContent = () => {
+  const { reservations, isLoading, error } = useReservations();
+
+  const nextReservation = useMemo(() => {
+    if (!reservations) return null;
+
+    const upcomingReservations = reservations
+      .filter(
+        (r) =>
+          r.estado.nombre === 'Confirmada' || r.estado.nombre === 'En proceso'
+      )
+      .sort((a, b) => {
+        const dateA = new Date(`${a.fecha}T${a.hora_inicio}`);
+        const dateB = new Date(`${b.fecha}T${b.hora_inicio}`);
+        return dateA.getTime() - dateB.getTime();
+      });
+
+    return upcomingReservations[0] || null;
+  }, [reservations]);
+
+  if (isLoading) {
+    return <p>Cargando tu próxima reserva...</p>;
+  }
+
+  if (error) {
+    return (
+      <p className="text-red-500">
+        No se pudo cargar la información de la reserva.
+      </p>
+    );
+  }
+
+  if (nextReservation) {
+    const date = new Date(nextReservation.fecha);
+
+    return (
+      <div className="space-y-2">
+        <p>
+          <strong>Fecha:</strong>{' '}
+          {isNaN(date.getTime())
+            ? 'Fecha inválida'
+            : date.toLocaleDateString('es-CO', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'UTC',
+              })}
+        </p>
+        <p>
+          <strong>Hora:</strong>{' '}
+          {nextReservation.hora_inicio.split(':').slice(0, 2).join(':')}
+        </p>
+        <p>
+          <strong>Estado:</strong>{' '}
+          <span className="font-semibold text-primary">
+            {nextReservation.estado.nombre}
+          </span>
+        </p>
+        <Link to="/reservations" className="inline-block pt-2">
+          <button className="mt-4 rounded-md bg-primary px-4 py-2 font-bold text-white transition-colors duration-200 hover:bg-primary-dark">
+            Ver todas mis reservas
+          </button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <p>
+        Actualmente no tienes ninguna reserva programada. ¡Dirígete a la sección
+        de reservas para planificar tu próxima visita!
+      </p>
+      <Link to="/reservations">
+        <button className="mt-4 rounded-md bg-primary px-4 py-2 font-bold text-white transition-colors duration-200 hover:bg-primary-dark">
+          Crear Reserva
+        </button>
+      </Link>
+    </>
+  );
+};
+
 export const DashboardPage = () => {
   const { user } = useAuth();
 
-  // Cláusula de guardia para evitar renderizar el componente si no hay un usuario autenticado.
   if (!user) {
     return null;
   }
@@ -33,22 +118,13 @@ export const DashboardPage = () => {
         </p>
       </div>
 
-      {/* Grid principal para las tarjetas de información */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Tarjeta de Reserva Actual */}
         <div className="lg:col-span-2">
           <DashboardCard title="Tu Próxima Reserva">
-            <p>
-              Actualmente no tienes ninguna reserva programada. ¡Dirígete a la
-              sección de reservas para planificar tu próxima visita!
-            </p>
-            <button className="mt-4 rounded-md bg-primary px-4 py-2 font-bold text-white transition-colors duration-200 hover:bg-primary-dark">
-              Crear Reserva
-            </button>
+            <NextReservationContent />
           </DashboardCard>
         </div>
 
-        {/* Tarjeta de Horarios */}
         <DashboardCard title="Horario de Funcionamiento">
           <ul className="space-y-2">
             <li className="flex justify-between">
@@ -66,7 +142,6 @@ export const DashboardPage = () => {
           </ul>
         </DashboardCard>
 
-        {/* Tarjeta de Notificaciones */}
         <div className="lg:col-span-3">
           <DashboardCard title="Noticias y Anuncios">
             <p>
