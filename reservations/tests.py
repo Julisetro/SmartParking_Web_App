@@ -240,3 +240,81 @@ class ReservationAPITests(APITestCase):
         response = self.client.get(f"/api/reservations/{reservation_b.id}/")
         # Verificamos que la respuesta es 404 Not Found
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_can_cancel_own_confirmed_reservation(self):
+        """
+        Verifica que un usuario puede cancelar su propia reserva si está 'Confirmada'.
+        """
+        # 1. Crear una reserva con estado 'Confirmada' para el usuario de prueba
+        reserva = Reserva.objects.create(
+            user=self.user,
+            estado=self.estado_confirmada,
+            fecha="2025-12-01",
+            hora_inicio="10:00:00",
+            tarifa_hora=4000.00,
+            total_pago=0.00,
+            codigo_qr="QR-CANCEL-TEST-1",
+        )
+        # 2. Autenticar y enviar la petición POST para cancelar
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(f"/api/reservations/{reserva.id}/cancel/")
+
+        # 3. Verificar que la respuesta es 200 OK
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # 4. Refrescar el estado de la reserva desde la base de datos
+        reserva.refresh_from_db()
+
+        # 5. Verificar que el nuevo estado de la reserva es 'Cancelada'
+        self.assertEqual(reserva.estado.nombre, "Cancelada")
+        self.assertEqual(response.data["estado"]["nombre"], "Cancelada")
+
+    def test_user_cannot_cancel_non_confirmed_reservation(self):
+        """
+        Verifica que un usuario no puede cancelar una reserva que no esté 'Confirmada'.
+        """
+        # 1. Crear una reserva con estado 'Finalizada'
+        reserva = Reserva.objects.create(
+            user=self.user,
+            estado=self.estado_finalizada,
+            fecha="2025-12-02",
+            hora_inicio="11:00:00",
+            tarifa_hora=4000.00,
+            total_pago=8000.00,
+            codigo_qr="QR-CANCEL-TEST-2",
+        )
+        # 2. Autenticar e intentar cancelar
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(f"/api/reservations/{reserva.id}/cancel/")
+
+        # 3. Verificar que la respuesta es 400 Bad Request
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # 4. Verificar que el estado de la reserva no ha cambiado
+        reserva.refresh_from_db()
+        self.assertEqual(reserva.estado.nombre, "Finalizada")
+
+    def test_user_cannot_cancel_other_users_reservation(self):
+        """
+        Verifica que un usuario no puede cancelar la reserva de otro usuario.
+        """
+        # 1. Crear una reserva para el usuario B
+        reserva_b = Reserva.objects.create(
+            user=self.user_b,
+            estado=self.estado_confirmada,
+            fecha="2025-12-03",
+            hora_inicio="12:00:00",
+            tarifa_hora=4000.00,
+            total_pago=0.00,
+            codigo_qr="QR-CANCEL-TEST-3",
+        )
+        # 2. Autenticar como usuario A e intentar cancelar la reserva del usuario B
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(f"/api/reservations/{reserva_b.id}/cancel/")
+
+        # 3. Verificar que la respuesta es 404 Not Found
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+        # 4. Verificar que el estado de la reserva de B no ha cambiado
+        reserva_b.refresh_from_db()
+        self.assertEqual(reserva_b.estado.nombre, "Confirmada")
