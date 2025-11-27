@@ -46,7 +46,7 @@ export const ProfilePage = () => {
     setIsLoading(true);
     setError(null);
     setSuccess(null);
-
+    // Llama a la API para actualizar el perfil del usuario
     try {
       const updateUser = await updateUserProfile(formData);
       updateUserContext(updateUser);
@@ -199,7 +199,7 @@ export const ProfilePage = () => {
               Actualizar
             </button>
           </div>
-          {/* Aquí irían las otras opciones de seguridad */}
+          {/* Aquí van otras opciones de seguridad */}
           {/* Cambiar email */}
           <div className="flex justify-between items-center border-t border-gray-200 pt-6">
             <div>

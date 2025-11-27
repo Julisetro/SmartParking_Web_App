@@ -3,6 +3,7 @@
  * tal como se recibe desde la API. El serializer solo expone el nombre.
  */
 export interface EstadoReserva {
+  id: number;
   nombre: string;
 }
 
