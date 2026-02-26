@@ -128,6 +128,24 @@ class ChangeEmailRequestView(generics.UpdateAPIView):
         verification_url = request.build_absolute_uri(
             reverse("email-change-confirm", kwargs={"uidb64": uidb64, "token": token})
         )
+
+        # --- INICIO DE LA MODIFICACIÓN PARA PRUEBAS E2E ---
+        import os
+
+        from django.conf import settings
+
+        if settings.DEBUG:
+            # Se define una ruta predecible para el archivo dentro del proyecto
+            link_file_path = os.path.join(
+                settings.BASE_DIR, "frontend", "e2e", "temp", "email_link.txt"
+            )
+            # Se asegura de que el directorio exista
+            os.makedirs(os.path.dirname(link_file_path), exist_ok=True)
+            # Se escribe la URL en el archivo
+            with open(link_file_path, "w") as f:
+                f.write(verification_url)
+        # --- FIN DE LA MODIFICACIÓN ---
+
         # 5. Enviamos el email de confirmacion (se imprime en consola)
         subject = "Confirma tu cambio de correo electrónico"
         text_content = f"Hola {user.first_name},\n\nPor favor, confirma tu cambio de correo electrónico haciendo clic en el siguiente enlace:\n{verification_url}\n\nSi no solicitaste este cambio, puedes ignorar este correo.\n\nGracias."  # noqa: E501
@@ -231,6 +249,24 @@ class ChangeCelularRequestView(generics.UpdateAPIView):
         print(f"Para: {new_celular}")
         print(f"Código de verificación: {verification_code}")
         print("-------------------------------")
+
+        # --- MODIFICACIÓN PARA PRUEBAS E2E ---
+        import os
+
+        from django.conf import settings
+
+        if settings.DEBUG:
+            # Se define una ruta predecible para el archivo
+            code_file_path = os.path.join(
+                settings.BASE_DIR, "frontend", "e2e", "temp", "celular_code.txt"
+            )
+            # Se asegura de que el directorio exista
+            os.makedirs(os.path.dirname(code_file_path), exist_ok=True)
+            # Se escribe el código en el archivo
+            with open(code_file_path, "w") as f:
+                f.write(verification_code)
+        # --- FIN DE LA MODIFICACIÓN ---
+
         # 3. Guardamos el código y el nuevo celular en la sesión con un timestamp
         request.session["new_celular_for_change"] = new_celular
         request.session["celular_verification_code"] = verification_code

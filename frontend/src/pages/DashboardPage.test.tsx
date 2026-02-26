@@ -154,7 +154,7 @@ describe('NextReservationContent', () => {
         id: 1,
         fecha: '2025-12-02',
         hora_inicio: '10:00:00',
-        estado: { nombre: 'Confirmada' },
+        estado: { id: 1, nombre: 'Confirmada' },
         user: 'john.doe@test.com',
         codigo_qr: 'qr1',
         tarifa_hora: '4000.00',
@@ -167,7 +167,7 @@ describe('NextReservationContent', () => {
         id: 2,
         fecha: '2025-12-01', // Esta es la próxima
         hora_inicio: '09:00:00',
-        estado: { nombre: 'Confirmada' },
+        estado: { id: 1, nombre: 'Confirmada' },
         user: 'john.doe@test.com',
         codigo_qr: 'qr2',
         tarifa_hora: '4000.00',
@@ -180,7 +180,7 @@ describe('NextReservationContent', () => {
         id: 3,
         fecha: '2025-11-30',
         hora_inicio: '08:00:00',
-        estado: { nombre: 'Finalizada' }, // Esta no cuenta
+        estado: { id: 2, nombre: 'Finalizada' }, // Esta no cuenta
         user: 'john.doe@test.com',
         codigo_qr: 'qr3',
         tarifa_hora: '4000.00',
@@ -217,7 +217,7 @@ describe('NextReservationContent', () => {
         id: 3,
         fecha: '2025-11-30',
         hora_inicio: '08:00:00',
-        estado: { nombre: 'Finalizada' }, // No hay activas
+        estado: { id: 2, nombre: 'Finalizada' }, // No hay activas
         user: 'john.doe@test.com',
         codigo_qr: 'qr3',
         tarifa_hora: '4000.00',

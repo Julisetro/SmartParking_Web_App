@@ -1,4 +1,5 @@
 // src/features/reservations/components/CancelConfirmationModal.tsx
+import React from 'react';
 
 interface CancelConfirmationModalProps {
   isOpen: boolean;
@@ -9,14 +10,13 @@ interface CancelConfirmationModalProps {
 
 /**
  * Componente modal para confirmar la cancelación de una reserva.
- * 
+ *
  * @param {CancelConfirmationModalProps} props - Propiedades para controlar el modal.
- * @returns {JSX.Element | null} El modal de confirmación o null si no está abierto.
+ * @returns {React.ReactElement | null} El modal de confirmación o null si no está abierto.
  */
-const CancelConfirmationModal = ({ isOpen, onClose, onConfirm, isSubmitting }: CancelConfirmationModalProps): JSX.Element | null => {
+const CancelConfirmationModal = ({ isOpen, onClose, onConfirm, isSubmitting }: CancelConfirmationModalProps): React.ReactElement | null => {
   if (!isOpen) {
-    return null;
-  }
+    return null;  }
 
   return (
     <div

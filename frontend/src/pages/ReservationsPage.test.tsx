@@ -65,7 +65,7 @@ describe('ReservationsPage', () => {
   it('debería renderizar el contenido principal cuando los datos se cargan correctamente', () => {
     // Arrange: Configuramos el hook para que devuelva datos de reservas
     const mockReservations: Reserva[] = [
-      { id: 1, fecha: '2025-12-01', hora_inicio: '10:00:00', estado: { nombre: 'Confirmada' }, user: 'test@test.com', codigo_qr: 'qr1', tarifa_hora: '4000', total_pago: '0', hora_salida: null, fecha_creacion: '', fecha_actualizacion: '' },
+      { id: 1, fecha: '2025-12-01', hora_inicio: '10:00:00', estado: { id: 1, nombre: 'Confirmada' }, user: 'test@test.com', codigo_qr: 'qr1', tarifa_hora: '4000', total_pago: '0', hora_salida: null, fecha_creacion: '', fecha_actualizacion: '' },
     ];
     mockUseReservations.mockReturnValue({
       reservations: mockReservations,
@@ -93,8 +93,8 @@ describe('ReservationsPage', () => {
   it('debería pasar las reservas correctamente al componente ReservationList', () => {
     // Arrange
     const mockReservations: Reserva[] = [
-      { id: 1, fecha: '2025-12-01', hora_inicio: '10:00:00', estado: { nombre: 'Confirmada' }, user: 'test@test.com', codigo_qr: 'qr1', tarifa_hora: '4000', total_pago: '0', hora_salida: null, fecha_creacion: '', fecha_actualizacion: '' },
-      { id: 2, fecha: '2025-12-02', hora_inicio: '11:00:00', estado: { nombre: 'Pendiente' }, user: 'test@test.com', codigo_qr: 'qr2', tarifa_hora: '4000', total_pago: '0', hora_salida: null, fecha_creacion: '', fecha_actualizacion: '' },
+      { id: 1, fecha: '2025-12-01', hora_inicio: '10:00:00', estado: { id: 1, nombre: 'Confirmada' }, user: 'test@test.com', codigo_qr: 'qr1', tarifa_hora: '4000', total_pago: '0', hora_salida: null, fecha_creacion: '', fecha_actualizacion: '' },
+      { id: 2, fecha: '2025-12-02', hora_inicio: '11:00:00', estado: { id: 3, nombre: 'Pendiente' }, user: 'test@test.com', codigo_qr: 'qr2', tarifa_hora: '4000', total_pago: '0', hora_salida: null, fecha_creacion: '', fecha_actualizacion: '' },
     ];
     mockUseReservations.mockReturnValue({
       reservations: mockReservations,

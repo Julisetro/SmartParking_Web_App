@@ -1,0 +1,1 @@
+http://localhost:8000/api/users/change-email/confirm/NA/d3677z-3633e53a547078fdb93b8b34ffc95bb4/

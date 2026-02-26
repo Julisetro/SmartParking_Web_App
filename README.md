@@ -1,166 +1,164 @@
-# Smart Parking Web App
+# Manual Técnico: Smart Parking Web App
 
-Una aplicación web full-stack para la gestión de un sistema de parqueadero inteligente. El proyecto utiliza Django y Django REST Framework para el backend, y React con Vite para el frontend. Permite a los usuarios registrarse, iniciar sesión y gestionar la información de su perfil.
+## 1. Descripción General
 
-## Stack Tecnológico
+Este documento sirve como guía de instalación y ejecución para la aplicación **Smart Parking Web App**.
 
-- **Backend:** Python, Django, Django REST Framework
-- **Frontend:** React, TypeScript, Vite, Tailwind CSS
-- **Base de Datos:** MySQL
+El proyecto es una aplicación web full-stack para la gestión de un sistema de parqueadero inteligente. Permite a los usuarios registrarse, gestionar sus perfiles y realizar reservas de estacionamiento.
 
-## Características
+### 1.1. Stack Tecnológico
 
-- **Autenticación de Usuarios:** Registro de nuevas cuentas, inicio y cierre de sesión.
-- **Gestión de Perfil:** Los usuarios pueden ver y actualizar la información de su perfil, incluyendo:
-  - Cambio de correo electrónico.
-  - Cambio de número de celular.
-  - Actualización de contraseña.
+- **Backend**: Python, Django, Django REST Framework (DRF)
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS
+- **Base de Datos**: MySQL
+- **Pruebas**:
+  - Backend: Django Testing Framework (unittest)
+  - Frontend: Vitest, React Testing Library
 
-## Prerrequisitos
+## 2. Prerrequisitos
 
-Asegúrate de tener instalado lo siguiente en tu sistema:
+Antes de comenzar, asegúrate de tener instalado el siguiente software en tu sistema:
 
 - Python (versión 3.8 o superior)
-- Node.js (versión 16 o superior)
-- npm (normalmente se instala con Node.js)
-- Un servidor de MySQL en funcionamiento.
+- Node.js (versión 18 o superior, LTS recomendado) y npm
+- Un servidor de MySQL en funcionamiento
+- Git
 
-## Instalación y Puesta en Marcha
+## 3. Configuración del Entorno de Desarrollo
 
-Sigue estos pasos para configurar el entorno de desarrollo local.
-La rama activa actualmente es la rama develop
+Sigue estos pasos para configurar el proyecto en tu máquina local.
 
-### 1. Clonar el Repositorio
+### 3.1. Clonar el Repositorio
 
-```bash
-git clone https://github.com/Julisetro/SmartParking_Web_App
-cd SmartParking_Web_App
-git checkout develop
-```
-
-O también:
+Primero, clona el repositorio del proyecto desde GitHub. Se recomienda clonar directamente la rama `develop` que contiene los últimos cambios en desarrollo.
 
 ```bash
-git clone -b develop https://github.com/Julisetro/SmartParking_Web_App
+git clone -b develop https://github.com/Julisetro/SmartParking_Web_App.git
 cd SmartParking_Web_App
 ```
 
-### 2. Configuración de la Base de Datos (MySQL)
+### 3.2. Configuración del Backend (Django)
 
-1.  Inicia sesión en tu servidor de MySQL.
-2.  Crea una nueva base de datos para el proyecto. Por ejemplo:
-    ```sql
-    CREATE DATABASE smart_parking_db;
-    ```
-3.  En la raíz del proyecto, crea un archivo llamado `.env`.
-4.  Añade las siguientes variables a tu archivo `.env` y ajústalas con tus credenciales de MySQL.
+1.  **Crear y Activar Entorno Virtual**:
+    Desde la raíz del proyecto, crea un entorno virtual para aislar las dependencias de Python.
 
-    ```env
-    DB_NAME=smart_parking_db
-    DB_USER=tu_usuario_mysql
-    DB_PASSWORD=tu_contraseña_mysql
-    DB_HOST=localhost
-    DB_PORT=3306
+    ```bash
+    # Crear el entorno virtual
+    python -m venv venv
     ```
 
-### 3. Configuración del Backend
+    ```bash
+    # Activar en Windows
+    source ./venv/Scripts/activate
+    ```
+
+    ```bash
+    # Activar en macOS/Linux
+    source venv/bin/activate
+    ```
+
+2.  **Instalar Dependencias**:
+    Con el entorno virtual activado, instala todas las librerías necesarias.
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Configurar Variables de Entorno**:
+    La aplicación necesita credenciales para conectarse a la base de datos.
+    - Copia el archivo de ejemplo `.env.example` a un nuevo archivo llamado `.env`.
+
+      ```bash
+      # En Windows (Command Prompt)
+      copy .env.example .env
+
+      # En macOS/Linux o Windows (PowerShell/Git Bash)
+      cp .env.example .env
+      ```
+
+    - Abre el archivo `.env` y edita las variables (`DB_NAME`, `DB_USER`, `DB_PASSWORD`, etc.) con tus credenciales de MySQL. Asegúrate de haber creado previamente la base de datos en tu servidor MySQL.
+
+4.  **Aplicar Migraciones**:
+    Ejecuta las migraciones para crear las tablas de la base de datos.
+
+    ```bash
+    python manage.py migrate
+    ```
+
+### 3.3. Configuración del Frontend (React)
+
+1.  **Navegar al Directorio del Frontend**:
+    En una terminal separada, muévete a la carpeta `frontend`.
+
+    ```bash
+    cd frontend
+    ```
+
+2.  **Instalar Dependencias**:
+    Instala todos los paquetes de Node.js necesarios.
+
+    ```bash
+    npm install
+    ```
+
+## 4. Ejecución de la Aplicación en Desarrollo
+
+Para ejecutar la aplicación, necesitas iniciar ambos servidores (backend y frontend) simultáneamente en dos terminales distintas.
+
+### 4.1. Iniciar Servidor del Backend
+
+Con el entorno virtual de Python activado y desde la raíz del proyecto:
 
 ```bash
-# Crear y activar el entorno virtual
-# En Windows:
-python -m venv venv
-venv\Scripts\activate
-# o también:
-source ./venv/Scrips/activate
-
-# En macOS/Linux:
-python3 -m venv venv
-source venv/bin/activate
-
-# Instalar dependencias de Python
-pip install -r requirements.txt
-
-# Aplicar las migraciones a la base de datos
-python manage.py migrate
-
-# Iniciar el servidor de desarrollo de Django
 python manage.py runserver
 ```
 
-El backend estará corriendo en `http://127.0.0.1:8000`.
+El backend estará disponible en `http://127.0.0.1:8000`.
 
-### 4. Configuración del Frontend
+### 4.2. Iniciar Servidor del Frontend
 
-Abre una nueva terminal y navega al directorio del frontend.
+En otra terminal, dentro de la carpeta `frontend/`:
 
 ```bash
-cd frontend
-
-# Instalar dependencias de Node.js
-npm install
-
-# Iniciar el servidor de desarrollo de Vite
 npm run dev
 ```
 
-El frontend estará disponible en `http://localhost:5173` (o el puerto que indique Vite).
+El frontend estará disponible en `http://localhost:5173`.
 
-## Pruebas (Testing)
+### 4.3. Acceso a la Aplicación
 
-El backend del proyecto incluye un conjunto de pruebas para garantizar la calidad y el correcto funcionamiento de la API. Utilizamos el framework de pruebas incorporado de Django.
+Abre tu navegador y visita **`http://localhost:5173`**. La aplicación React se conectará automáticamente al backend que se ejecuta en el puerto 8000.
 
-### Ejecutar las Pruebas del Backend
+## 5. Ejecución de Pruebas
 
-Asegúrate de tener tu entorno virtual activado y las dependencias instaladas.
+Para asegurar la calidad del código y la estabilidad de las funcionalidades, el proyecto cuenta con suites de pruebas para el backend y el frontend.
 
-**1. Para ejecutar todas las pruebas del proyecto:**
+### 5.1. Pruebas del Backend
 
-Este comando descubrirá y ejecutará todas las pruebas en todas las aplicaciones del proyecto.
+Con el entorno virtual activado, ejecuta el siguiente comando desde la raíz del proyecto:
 
 ```bash
-# En Windows
-.\venv\Scripts\python.exe manage.py test
-
-# En macOS/Linux
+# Ejecutar todas las pruebas del backend
 python manage.py test
 ```
 
-**2. Para ejecutar las pruebas de una aplicación específica:**
-
-Puedes limitar la ejecución a una sola aplicación para agilizar el proceso de desarrollo.
+Para ejecutar pruebas de una aplicación específica (ej. `users`):
 
 ```bash
-# Ejemplo para la aplicación 'users' en Windows
-.\venv\Scripts\python.exe manage.py test users
-
-# Ejemplo para la aplicación 'reservations' en Windows
-.\venv\Scripts\python.exe manage.py test reservations
+python manage.py test users
 ```
 
-En macOS/Linux, simplemente reemplaza `.\venv\Scripts\python.exe` por `python`.
+### 5.2. Pruebas del Frontend
 
-## Uso de la Aplicación
+Desde la carpeta `frontend/`, ejecuta:
 
-Una vez que la aplicación esté corriendo (tanto el frontend como el backend), sigue estos pasos:
+```bash
+# Ejecutar todas las pruebas del frontend en modo observador (watch)
+npm test
+```
 
-1.  **Acceso:** Abre tu navegador web y navega a la URL del frontend (por defecto `http://localhost:5173`).
-2.  **Registro:** Si eres un usuario nuevo, haz clic en la opción de "Registro" y completa el formulario con tus datos.
-3.  **Inicio de Sesión:** Después de registrarte o si ya tienes una cuenta, procede a "Iniciar Sesión" con tus credenciales.
-4.  **Gestión de Perfil:** Una vez autenticado, podrás acceder a tu página de perfil, haciendo click al icono en la parte superior derecha, donde tendrás la opción de ver y actualizar tu correo electrónico, número de celular y contraseña. En ese mismo icono, en donde se accede a la configuracion de la cuenta, podras cerrar sesión también,
+O para ejecutar las pruebas una sola vez:
 
-## Estructura del Proyecto
-
-El proyecto está organizado en dos directorios principales: `core` (backend Django) y `frontend` (aplicación React).
-
-### Backend (`core/`)
-
-- `core/`: Configuración principal de Django (settings, URLs globales, WSGI/ASGI).
-- `users/`: Aplicación Django para la gestión de usuarios, incluyendo modelos de datos, vistas de API (serializers, views) y migraciones.
-
-### Frontend (`frontend/`)
-
-- `src/`: Código fuente principal de la aplicación React.
-  - `src/core/`: Componentes y lógicas fundamentales para la estructura de la aplicación, como layouts (`AppLayout`, `PublicLayout`) y enrutamiento (`AppRouter`).
-  - `src/features/`: Módulos específicos de características (features), como autenticación (`auth`) y gestión de perfil (`profile`), cada uno con su lógica, APIs y componentes.
-  - `src/pages/`: Componentes de páginas que representan las vistas principales de la aplicación (Dashboard, Home, Login, Profile, Register).
-  - `src/shared/`: Componentes reutilizables y utilidades compartidas que no pertenecen a una característica específica.
+```bash
+npm test -- --run
+```

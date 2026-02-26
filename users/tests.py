@@ -110,7 +110,7 @@ class UserRegistrationSerializerUnitTest(TestCase):
         Verifica que el método `create` del serializador cree correctamente
         una instancia de CustomUser.
         """
-        # Datos validados que el serializador recibiría
+        # Datos validados que el serializador recibira
         validated_data = {
             "email": "unit_test@example.com",
             "password": "UnitTestPassword123",

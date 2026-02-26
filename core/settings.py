@@ -34,7 +34,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Configuracion CORS
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "http://localhost:4173"]
 
 # Configuracion CORS para permitir cookies
 CORS_ALLOW_CREDENTIALS = True
