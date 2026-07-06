@@ -42,7 +42,7 @@ Authorization: Bearer {access_token}
 | `POST` | `/api/users/change-celular/` | Inicia el cambio de número de celular | Sí |
 | `POST` | `/api/users/change-celular/confirm/` | Confirma el cambio de celular con código de verificación | Sí |
 | `POST` | `/api/users/change-email/` | Inicia el cambio de correo electrónico | Sí |
-| `GET` | `/api/users/change-email/confirm/<uidb64>/<token>/` | Confirma el cambio de correo vía enlace | No |
+| `GET` | `/api/users/change-email/confirm/{uidb64}/{token}/` | Confirma el cambio de correo vía enlace | No |
 | `POST` | `/api/users/logout/` | Cierra sesión e invalida el `refresh` token | Sí |
 
 ### Reservas (`/api/`)
