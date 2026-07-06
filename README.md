@@ -1,4 +1,64 @@
-# Manual Técnico: Smart Parking Web App
+# Smart Parking Web App
+
+![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat&logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-5.x-092E20?style=flat&logo=django&logoColor=white)
+![DRF](https://img.shields.io/badge/Django_REST_Framework-3.x-ff1709?style=flat&logo=django&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat&logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat&logo=typescript&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.x-4479A1?style=flat&logo=mysql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-SimpleJWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)
+
+Aplicación web full-stack para la gestión inteligente de un parqueadero. Permite a los usuarios registrarse, administrar su perfil y realizar reservas de estacionamiento. El backend expone una API REST con autenticación JWT; el frontend está desarrollado en React con TypeScript.
+
+## ✨ Funcionalidades Principales
+
+- **Registro e inicio de sesión** mediante correo electrónico y contraseña con autenticación JWT
+- **Gestión de perfil**: actualización de nombre, correo electrónico, número de celular y contraseña
+- **CRUD de reservas**: crear, consultar, actualizar y cancelar reservas de estacionamiento
+- **Generación de código QR** por reserva confirmada
+- **Protección de rutas** en el frontend según estado de autenticación
+- **Pruebas automatizadas** en backend (Django unittest) y frontend (Vitest + React Testing Library)
+
+## 🔌 API REST — Endpoints
+
+Base URL: `http://127.0.0.1:8000`
+
+La API utiliza autenticación JWT. Incluye el token en el encabezado de cada solicitud autenticada:
+
+```
+Authorization: Bearer {access_token}
+```
+
+### Usuarios (`/api/users/`)
+
+| Método | Endpoint | Descripción | Auth |
+|--------|----------|-------------|:----:|
+| `POST` | `/api/users/register/` | Registro de nuevo usuario | No |
+| `POST` | `/api/users/login/` | Inicio de sesión; devuelve `access` y `refresh` tokens | No |
+| `POST` | `/api/users/token/refresh/` | Renueva el `access` token con el `refresh` token | No |
+| `GET` | `/api/users/me/` | Obtiene el perfil del usuario autenticado | Sí |
+| `PUT` / `PATCH` | `/api/users/me/` | Actualiza el perfil (`first_name`, `last_name`) | Sí |
+| `POST` | `/api/users/change-password/` | Cambia la contraseña | Sí |
+| `POST` | `/api/users/change-celular/` | Inicia el cambio de número de celular | Sí |
+| `POST` | `/api/users/change-celular/confirm/` | Confirma el cambio de celular con código de verificación | Sí |
+| `POST` | `/api/users/change-email/` | Inicia el cambio de correo electrónico | Sí |
+| `GET` | `/api/users/change-email/confirm/{uidb64}/{token}/` | Confirma el cambio de correo vía enlace | No |
+| `POST` | `/api/users/logout/` | Cierra sesión e invalida el `refresh` token | Sí |
+
+### Reservas (`/api/`)
+
+| Método | Endpoint | Descripción | Auth |
+|--------|----------|-------------|:----:|
+| `GET` | `/api/reservations/` | Lista las reservas del usuario autenticado | Sí |
+| `POST` | `/api/reservations/` | Crea una nueva reserva | Sí |
+| `GET` | `/api/reservations/{id}/` | Detalle de una reserva específica | Sí |
+| `PUT` / `PATCH` | `/api/reservations/{id}/` | Actualiza una reserva | Sí |
+| `DELETE` | `/api/reservations/{id}/` | Elimina una reserva | Sí |
+| `POST` | `/api/reservations/{id}/cancel/` | Cancela una reserva en estado "Confirmada" | Sí |
+
+---
+
+## 📖 Manual Técnico de Instalación
 
 ## 1. Descripción General
 
@@ -30,10 +90,10 @@ Sigue estos pasos para configurar el proyecto en tu máquina local.
 
 ### 3.1. Clonar el Repositorio
 
-Primero, clona el repositorio del proyecto desde GitHub. Se recomienda clonar directamente la rama `develop` que contiene los últimos cambios en desarrollo.
+Primero, clona el repositorio del proyecto desde GitHub.
 
 ```bash
-git clone -b develop https://github.com/Julisetro/SmartParking_Web_App.git
+git clone https://github.com/NeoBonnt/SmartParking_Web_App.git
 cd SmartParking_Web_App
 ```
 
@@ -48,8 +108,14 @@ cd SmartParking_Web_App
     ```
 
     ```bash
-    # Activar en Windows
+    # Activar en Windows (Git Bash)
     source ./venv/Scripts/activate
+
+    # Activar en Windows (PowerShell)
+    .\venv\Scripts\Activate.ps1
+
+    # Activar en Windows (CMD)
+    venv\Scripts\activate.bat
     ```
 
     ```bash
