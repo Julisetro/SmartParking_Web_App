@@ -30,10 +30,10 @@ Sigue estos pasos para configurar el proyecto en tu máquina local.
 
 ### 3.1. Clonar el Repositorio
 
-Primero, clona el repositorio del proyecto desde GitHub. Se recomienda clonar directamente la rama `develop` que contiene los últimos cambios en desarrollo.
+Primero, clona el repositorio del proyecto desde GitHub. Se recomienda clonar directamente la rama `main`, que contiene la versión principal y actualizada del proyecto.
 
 ```bash
-git clone -b develop https://github.com/Julisetro/SmartParking_Web_App.git
+git clone -b main https://github.com/NeoBonnt/SmartParking_Web_App.git
 cd SmartParking_Web_App
 ```
 
